@@ -1,5 +1,6 @@
 import userEvent from '@testing-library/user-event'
 import React, { useEffect, useState } from 'react'
+import "./App.css"
 
 export default function App() {
 
@@ -14,27 +15,24 @@ export default function App() {
     { id: '8', value: '' },
     { id: '9', value: '' }]
 
+    const winnerStatus = [
+      ['1','2','3'],
+      ['1','5','9'],
+      ['1','4','7'],
+      ['2','5','8'],
+      ['3','5','7'],
+      ['3','6','9'],
+      ['4','5','6'],
+      ['7','8','9']
+  
+    ]
+
   const [gameStatus, gameStatusData] = useState(true)
   const  [activeUser, setActiveUser] = useState(1)  
   const [layers, setLayers] = useState(initialData)
   const [winner, setWinner] = useState(initialData)
-  const winnerStatus = [
-    ['1','2','3'],
-    ['1','5','9'],
-    ['1','4','7'],
-    ['2','5','8'],
-    ['3','5','7'],
-    ['3','6','9'],
-    ['4','5','6'],
-    ['7','8','9']
-
-  ]
-
-  const box = {
-    border: '1px solid black',
-    width: '200px',
-    height: '200px'
-  }
+  
+  const [draw, setDraw] = useState(false)
 
   const onLayerClick = (e) =>{
     const newlayerData = layers
@@ -52,17 +50,13 @@ export default function App() {
     setLayers(newlayerData)
   }
 
-  function multipleExist(arr, values){
-    return values.every(value => {
-      return arr.indexOf(value) !== -1;
-    })
-  }
 
   const resetGame = () => {
     gameStatusData(true)
     setActiveUser(false)
     setLayers(initialData)
     setWinner(0)
+    setDraw(false)
   }
 
   useEffect(() => {
@@ -78,6 +72,7 @@ export default function App() {
         gameStatusData(false)
       }
     })
+    setDraw(Object.values(layers).every(x => (x.value !== '' )))
   })
 
     useEffect(() => {
@@ -86,15 +81,16 @@ export default function App() {
 
   return (
     <div className='container'>
-      {gameStatus ? null : <h1>Game Winner! {winner}</h1>}
-      {gameStatus ? null : <> <h1>Restart Game! {winner}</h1> <button onClick={resetGame}>New Game</button></>}
-      {gameStatus ? activeUser === 1 ? <h5> It's on player 1 </h5> : <h5> It's on player 2</h5> : null}
-      <div className='row ' style={{marginTop: '100px'}}>
+      {gameStatus ? null : <h1>Game Winner! Player: {winner}</h1>}
+      {gameStatus ? null : <> <h1>Restart Game! Winner is: Player {winner}</h1> <button className='btn btn-primary'  onClick={resetGame}>New Game</button></>}
+      {gameStatus && !draw ? activeUser === 1 ? <h5> It's on player 1 </h5> : <h5> It's on player 2</h5> : null}
+      {draw && gameStatus ? <> <h1>Game Draw!</h1> <button className='btn btn-primary'  onClick={resetGame}>New Game</button></>: null}
+      <div className='row ' style={{marginTop: '50px'}}>
         {
           layers.map(layer => {
             return (
-              <div key={layer.id} className='col-4' onClick={()=>{onLayerClick(layer.id)}} style={box}>
-                {layer.value}
+              <div key={layer.id} className='col-4 d-flex justify-content-center align-items-center' onClick={()=>{onLayerClick(layer.id)}} >
+               <p>{layer.value}</p> 
               </div>
             )
           })
@@ -103,5 +99,11 @@ export default function App() {
       </div>
     </div>
   )
+
+  function multipleExist(arr, values){
+    return values.every(value => {
+      return arr.indexOf(value) !== -1;
+    })
+  }
 }
 
